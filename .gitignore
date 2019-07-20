@@ -1,3 +1,7 @@
+.idea/clion.iml
+.idea/platformio.iml
+.idea/watcherTasks.xml
+.idea/workspace.xml
 .pio
 .pioenvs
 .piolibdeps
@@ -5,3 +9,9 @@
 .vscode/c_cpp_properties.json
 .vscode/ipch
 .vscode/launch.json
+.vscode/settings.json
+*.vcxproj
+ardunimo/
+cmake-build-debug/
+CMakeLists.txt
+CMakeListsPrivate.txt
