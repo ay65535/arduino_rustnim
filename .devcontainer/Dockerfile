@@ -27,16 +27,16 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Switch back to dialog for any ad-hoc use of apt-get
-ENV DEBIAN_FRONTEND=dialog
 
-
-ARG version=0.20.0
-WORKDIR /
+ENV HOME_DIR=/root
+# Execute and also put the following line last in ~/.profile
+ENV PATH="${HOME_DIR}/Nim/bin:${HOME_DIR}/.nimble/bin:$PATH"
+ARG version=0.20.2
+WORKDIR ${HOME_DIR}
 RUN wget http://nim-lang.org/download/nim-${version}.tar.xz \
     && tar xf nim-${version}.tar.xz; rm nim-${version}.tar.xz \
-    && mv nim-${version} nim
-WORKDIR /nim
+    && mv nim-${version} Nim
+WORKDIR ${HOME_DIR}/Nim
 RUN sh build.sh \
     && ln -snfv ${PWD}/bin/nim /bin/nim
 RUN nim c koch \
@@ -46,11 +46,15 @@ RUN nim c koch \
     && ln -snfv ${PWD}/bin/nimfind /bin/nimfind \
     && ln -snfv ${PWD}/bin/nimgrep /bin/nimgrep \
     && ln -snfv ${PWD}/bin/nimpretty /bin/nimpretty
-ENV PATH="/root/.nimble/bin:${PATH}"
-WORKDIR /
 RUN nimble refresh \
     && nimble install c2nim \
-    && git clone https://github.com/gokr/ardunimo.git
-WORKDIR /ardunimo
+    && ln -snfv ${HOME_DIR}/.nimble/bin/c2nim /bin/c2nim
+WORKDIR ${HOME_DIR}
+RUN git clone https://github.com/BaldEagleX02/Arduino-Nim.git ardunimo
+WORKDIR ${HOME_DIR}/ardunimo
 RUN make sdk \
-    && cp -v wrapper/fixed/alloc.nim /nim/lib/system/alloc.nim
+    && cp -fv wrapper/fixed/alloc.nim ${HOME_DIR}/Nim/lib/system/alloc.nim
+
+
+# Switch back to dialog for any ad-hoc use of apt-get
+ENV DEBIAN_FRONTEND=dialog

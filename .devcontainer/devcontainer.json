@@ -18,7 +18,8 @@
 		"bungcip.better-toml",
 		"vadimcn.vscode-lldb",
 		"serayuzgur.crates",
-		"kosz78.nim"
+		"kosz78.nim",
+		"platformio.platformio-ide"
 	],
 	"settings": {
 		"lldb.executable": "/usr/bin/lldb-3.9"
