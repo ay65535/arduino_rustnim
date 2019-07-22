@@ -5,6 +5,9 @@
 
 FROM rust:1
 
+#ENV https_proxy "http://199.19.250.205:80/"
+#ENV http_proxy "http://199.19.250.205:80/"
+
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
