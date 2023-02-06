@@ -5,8 +5,8 @@
 
 FROM rust:1
 
-#ENV https_proxy "http://199.19.250.205:80/"
-#ENV http_proxy "http://199.19.250.205:80/"
+ENV https_proxy "http://199.19.250.205:80/"
+ENV http_proxy "http://199.19.250.205:80/"
 
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
@@ -32,26 +32,32 @@ RUN apt-get update \
 
 
 ENV HOME_DIR=/root
+ARG version=0.13.0
+WORKDIR ${HOME_DIR}
+# If in a fresh Ubuntu
+RUN apt-get update \
+    && sudo apt-get upgrade \
+    && apt-get install git unzip build-essential \
+    # Install Nim and bootstrap it
+    && git clone https://github.com/nim-lang/Nim.git \
+    && git checkout 
+WORKDIR ${HOME_DIR}/Nim
+RUN git clone --depth 1 https://github.com/nim-lang/csources
+WORKDIR ${HOME_DIR}/Nim/csources
+RUN sh build.sh
+WORKDIR ${HOME_DIR}/Nim
+RUN bin/nim c koch \
+    && ./koch boot -d:release
 # Execute and also put the following line last in ~/.profile
 ENV PATH="${HOME_DIR}/Nim/bin:${HOME_DIR}/.nimble/bin:$PATH"
-ARG version=0.20.2
-WORKDIR ${HOME_DIR}
-RUN wget http://nim-lang.org/download/nim-${version}.tar.xz \
-    && tar xf nim-${version}.tar.xz; rm nim-${version}.tar.xz \
-    && mv nim-${version} Nim
-WORKDIR ${HOME_DIR}/Nim
-RUN sh build.sh \
-    && ln -snfv ${PWD}/bin/nim /bin/nim
-RUN nim c koch \
-    && ./koch tools \
-    && ln -snfv ${PWD}/bin/nimble /bin/nimble \
-    && ln -snfv ${PWD}/bin/nimsuggest /bin/nimsuggest \
-    && ln -snfv ${PWD}/bin/nimfind /bin/nimfind \
-    && ln -snfv ${PWD}/bin/nimgrep /bin/nimgrep \
-    && ln -snfv ${PWD}/bin/nimpretty /bin/nimpretty
-RUN nimble refresh \
-    && nimble install c2nim \
-    && ln -snfv ${HOME_DIR}/.nimble/bin/c2nim /bin/c2nim
+# Then install nimble
+RUN nim e install_nimble.nims \
+    # Let it refresh the package list
+    && nimble refresh \
+    # Use nimble to install c2nim
+    && nimble install c2nim
+
+
 WORKDIR ${HOME_DIR}
 RUN git clone https://github.com/BaldEagleX02/Arduino-Nim.git ardunimo
 WORKDIR ${HOME_DIR}/ardunimo
